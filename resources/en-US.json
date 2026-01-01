@@ -1,0 +1,85 @@
+{
+  "errors": {
+    "invalidRequest": "Invalid request",
+    "unauthorized": "Unauthorized",
+    "forbidden": "Forbidden",
+    "notFound": "Not found",
+    "internalError": "Internal server error",
+    "validationFailed": "Validation failed",
+    "userNotFound": "User not found",
+    "userAlreadyExists": "User already exists",
+    "usernameAlreadyUsed": "Username is already taken",
+    "userBlocked": "Your account has been blocked",
+    "invalidCredentials": "Invalid email or password",
+    "tokenExpired": "Token expired",
+    "invalidToken": "Invalid token"
+  },
+  "auth": {
+    "registerSuccess": "Registration successful",
+    "loginSuccess": "Login successful",
+    "logoutSuccess": "Logout successful",
+    "passwordChanged": "Password changed successfully",
+    "tokenRefreshed": "Token refreshed successfully"
+  },
+  "tenant": {
+    "created": "Tenant created successfully",
+    "updated": "Tenant updated successfully",
+    "deleted": "Tenant deleted successfully",
+    "notFound": "Tenant not found",
+    "alreadyExists": "Tenant with this slug already exists",
+    "invalidSlug": "Invalid slug format",
+    "memberAdded": "Member added to tenant",
+    "memberRemoved": "Member removed from tenant",
+    "invitationSent": "Invitation sent successfully",
+    "invitationFailed": "Failed to send invitation",
+    "alreadyMember": "User is already a member of this tenant",
+    "callbackSuccess": "Member added via invitation callback",
+    "blocked": "Tenant blocked successfully",
+    "unblocked": "Tenant unblocked successfully"
+  },
+  "role": {
+    "created": "Role created successfully",
+    "updated": "Role updated successfully",
+    "deleted": "Role deleted successfully",
+    "notFound": "Role not found",
+    "alreadyExists": "Role with this name already exists",
+    "assigned": "Role assigned successfully",
+    "unassigned": "Role unassigned successfully"
+  },
+  "claim": {
+    "created": "Claim created successfully",
+    "deleted": "Claim deleted successfully",
+    "notFound": "Claim not found",
+    "alreadyExists": "Claim already exists",
+    "assigned": "Claim assigned successfully",
+    "unassigned": "Claim unassigned successfully"
+  },
+  "totp": {
+    "setupSuccess": "Two-factor authentication setup initiated",
+    "enabledSuccess": "Two-factor authentication enabled successfully",
+    "disabledSuccess": "Two-factor authentication disabled successfully",
+    "invalidCode": "Invalid verification code",
+    "alreadyEnabled": "Two-factor authentication is already enabled",
+    "notEnabled": "Two-factor authentication is not enabled",
+    "notSetup": "Two-factor authentication has not been set up",
+    "verificationRequired": "Two-factor authentication required"
+  },
+  "user": {
+    "blocked": "User blocked successfully",
+    "unblocked": "User unblocked successfully"
+  },
+  "passwordReset": {
+    "requestSent": "If an account with this email exists, a password reset link has been sent",
+    "passwordReset": "Password has been reset successfully",
+    "tokenNotFound": "Password reset link is invalid or has already been used",
+    "tokenExpired": "Password reset link has expired"
+  },
+  "emailVerification": {
+    "codeSent": "Verification code has been sent to your email",
+    "verificationSuccess": "Email verified successfully",
+    "alreadyVerified": "Email is already verified",
+    "invalidCode": "Invalid verification code",
+    "codeExpired": "Verification code has expired",
+    "tooManyRequests": "Too many requests. Please wait before requesting a new code"
+  }
+}

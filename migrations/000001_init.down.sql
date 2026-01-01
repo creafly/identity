@@ -1,0 +1,14 @@
+DROP TABLE IF EXISTS outbox_events;
+DROP TABLE IF EXISTS email_verification_tokens;
+DROP TABLE IF EXISTS password_reset_tokens;
+DROP TABLE IF EXISTS user_tenant_roles;
+DROP TABLE IF EXISTS tenant_role_claims;
+DROP TABLE IF EXISTS tenant_roles;
+DROP TABLE IF EXISTS role_claims;
+DROP TABLE IF EXISTS user_claims;
+DROP TABLE IF EXISTS user_roles;
+DROP TABLE IF EXISTS claims;
+DROP TABLE IF EXISTS roles;
+DROP TABLE IF EXISTS tenant_members;
+DROP TABLE IF EXISTS tenants;
+DROP TABLE IF EXISTS users;
