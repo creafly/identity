@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"time"
 
 	"github.com/creafly/identity/internal/domain/entity"
 	"github.com/google/uuid"
@@ -11,10 +12,12 @@ import (
 type TenantRoleRepository interface {
 	Create(ctx context.Context, role *entity.TenantRole) error
 	GetByID(ctx context.Context, id uuid.UUID) (*entity.TenantRole, error)
+	GetByIDIncludeDeleted(ctx context.Context, id uuid.UUID) (*entity.TenantRole, error)
 	GetByName(ctx context.Context, tenantID uuid.UUID, name string) (*entity.TenantRole, error)
 	Update(ctx context.Context, role *entity.TenantRole) error
 	Delete(ctx context.Context, id uuid.UUID) error
-	ListByTenant(ctx context.Context, tenantID uuid.UUID) ([]*entity.TenantRole, error)
+	Restore(ctx context.Context, id uuid.UUID) error
+	ListByTenant(ctx context.Context, tenantID uuid.UUID, includeDeleted bool) ([]*entity.TenantRole, error)
 	GetDefaultRoles(ctx context.Context, tenantID uuid.UUID) ([]*entity.TenantRole, error)
 
 	AddClaim(ctx context.Context, tenantRoleID, claimID uuid.UUID) error
@@ -53,7 +56,17 @@ func (r *tenantRoleRepository) Create(ctx context.Context, role *entity.TenantRo
 
 func (r *tenantRoleRepository) GetByID(ctx context.Context, id uuid.UUID) (*entity.TenantRole, error) {
 	var role entity.TenantRole
-	query := `SELECT id, tenant_id, name, description, is_default, created_at, updated_at FROM tenant_roles WHERE id = $1`
+	query := `SELECT id, tenant_id, name, description, is_default, created_at, updated_at, deleted_at FROM tenant_roles WHERE id = $1 AND deleted_at IS NULL`
+	err := r.db.GetContext(ctx, &role, query, id)
+	if err != nil {
+		return nil, err
+	}
+	return &role, nil
+}
+
+func (r *tenantRoleRepository) GetByIDIncludeDeleted(ctx context.Context, id uuid.UUID) (*entity.TenantRole, error) {
+	var role entity.TenantRole
+	query := `SELECT id, tenant_id, name, description, is_default, created_at, updated_at, deleted_at FROM tenant_roles WHERE id = $1`
 	err := r.db.GetContext(ctx, &role, query, id)
 	if err != nil {
 		return nil, err
@@ -63,7 +76,7 @@ func (r *tenantRoleRepository) GetByID(ctx context.Context, id uuid.UUID) (*enti
 
 func (r *tenantRoleRepository) GetByName(ctx context.Context, tenantID uuid.UUID, name string) (*entity.TenantRole, error) {
 	var role entity.TenantRole
-	query := `SELECT id, tenant_id, name, description, is_default, created_at, updated_at FROM tenant_roles WHERE tenant_id = $1 AND name = $2`
+	query := `SELECT id, tenant_id, name, description, is_default, created_at, updated_at, deleted_at FROM tenant_roles WHERE tenant_id = $1 AND name = $2 AND deleted_at IS NULL`
 	err := r.db.GetContext(ctx, &role, query, tenantID, name)
 	if err != nil {
 		return nil, err
@@ -82,21 +95,31 @@ func (r *tenantRoleRepository) Update(ctx context.Context, role *entity.TenantRo
 }
 
 func (r *tenantRoleRepository) Delete(ctx context.Context, id uuid.UUID) error {
-	query := `DELETE FROM tenant_roles WHERE id = $1 AND is_default = false`
-	_, err := r.db.ExecContext(ctx, query, id)
+	query := `UPDATE tenant_roles SET deleted_at = $1, updated_at = $1 WHERE id = $2 AND is_default = false AND deleted_at IS NULL`
+	_, err := r.db.ExecContext(ctx, query, time.Now(), id)
 	return err
 }
 
-func (r *tenantRoleRepository) ListByTenant(ctx context.Context, tenantID uuid.UUID) ([]*entity.TenantRole, error) {
+func (r *tenantRoleRepository) Restore(ctx context.Context, id uuid.UUID) error {
+	query := `UPDATE tenant_roles SET deleted_at = NULL, updated_at = $1 WHERE id = $2 AND deleted_at IS NOT NULL`
+	_, err := r.db.ExecContext(ctx, query, time.Now(), id)
+	return err
+}
+
+func (r *tenantRoleRepository) ListByTenant(ctx context.Context, tenantID uuid.UUID, includeDeleted bool) ([]*entity.TenantRole, error) {
 	var roles []*entity.TenantRole
-	query := `SELECT id, tenant_id, name, description, is_default, created_at, updated_at FROM tenant_roles WHERE tenant_id = $1 ORDER BY is_default DESC, name`
+	query := `SELECT id, tenant_id, name, description, is_default, created_at, updated_at, deleted_at FROM tenant_roles WHERE tenant_id = $1`
+	if !includeDeleted {
+		query += ` AND deleted_at IS NULL`
+	}
+	query += ` ORDER BY is_default DESC, name`
 	err := r.db.SelectContext(ctx, &roles, query, tenantID)
 	return roles, err
 }
 
 func (r *tenantRoleRepository) GetDefaultRoles(ctx context.Context, tenantID uuid.UUID) ([]*entity.TenantRole, error) {
 	var roles []*entity.TenantRole
-	query := `SELECT id, tenant_id, name, description, is_default, created_at, updated_at FROM tenant_roles WHERE tenant_id = $1 AND is_default = true ORDER BY name`
+	query := `SELECT id, tenant_id, name, description, is_default, created_at, updated_at, deleted_at FROM tenant_roles WHERE tenant_id = $1 AND is_default = true AND deleted_at IS NULL ORDER BY name`
 	err := r.db.SelectContext(ctx, &roles, query, tenantID)
 	return roles, err
 }
@@ -155,10 +178,10 @@ func (r *tenantRoleRepository) RemoveAllFromUser(ctx context.Context, userID, te
 func (r *tenantRoleRepository) GetUserRoles(ctx context.Context, userID, tenantID uuid.UUID) ([]*entity.TenantRole, error) {
 	var roles []*entity.TenantRole
 	query := `
-		SELECT tr.id, tr.tenant_id, tr.name, tr.description, tr.is_default, tr.created_at, tr.updated_at 
+		SELECT tr.id, tr.tenant_id, tr.name, tr.description, tr.is_default, tr.created_at, tr.updated_at, tr.deleted_at 
 		FROM tenant_roles tr
 		JOIN user_tenant_roles utr ON utr.tenant_role_id = tr.id
-		WHERE utr.user_id = $1 AND utr.tenant_id = $2
+		WHERE utr.user_id = $1 AND utr.tenant_id = $2 AND tr.deleted_at IS NULL
 		ORDER BY tr.name
 	`
 	err := r.db.SelectContext(ctx, &roles, query, userID, tenantID)
@@ -172,7 +195,8 @@ func (r *tenantRoleRepository) GetUserClaims(ctx context.Context, userID, tenant
 		FROM claims c
 		JOIN tenant_role_claims trc ON trc.claim_id = c.id
 		JOIN user_tenant_roles utr ON utr.tenant_role_id = trc.tenant_role_id
-		WHERE utr.user_id = $1 AND utr.tenant_id = $2
+		JOIN tenant_roles tr ON tr.id = trc.tenant_role_id
+		WHERE utr.user_id = $1 AND utr.tenant_id = $2 AND tr.deleted_at IS NULL
 		ORDER BY c.value
 	`
 	err := r.db.SelectContext(ctx, &claims, query, userID, tenantID)
@@ -186,7 +210,7 @@ func (r *tenantRoleRepository) GetTenantAvailableClaims(ctx context.Context, ten
 		FROM claims c
 		JOIN tenant_role_claims trc ON trc.claim_id = c.id
 		JOIN tenant_roles tr ON tr.id = trc.tenant_role_id
-		WHERE tr.tenant_id = $1
+		WHERE tr.tenant_id = $1 AND tr.deleted_at IS NULL
 		ORDER BY c.value
 	`
 	err := r.db.SelectContext(ctx, &claims, query, tenantID)

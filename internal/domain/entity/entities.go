@@ -46,11 +46,12 @@ type Tenant struct {
 }
 
 type Role struct {
-	ID          uuid.UUID `db:"id" json:"id"`
-	Name        string    `db:"name" json:"name"`
-	Description string    `db:"description" json:"description"`
-	CreatedAt   time.Time `db:"created_at" json:"createdAt"`
-	UpdatedAt   time.Time `db:"updated_at" json:"updatedAt"`
+	ID          uuid.UUID  `db:"id" json:"id"`
+	Name        string     `db:"name" json:"name"`
+	Description string     `db:"description" json:"description"`
+	CreatedAt   time.Time  `db:"created_at" json:"createdAt"`
+	UpdatedAt   time.Time  `db:"updated_at" json:"updatedAt"`
+	DeletedAt   *time.Time `db:"deleted_at" json:"deletedAt,omitempty"`
 }
 
 type Claim struct {
@@ -88,13 +89,14 @@ type TenantMember struct {
 }
 
 type TenantRole struct {
-	ID          uuid.UUID `db:"id" json:"id"`
-	TenantID    uuid.UUID `db:"tenant_id" json:"tenantId"`
-	Name        string    `db:"name" json:"name"`
-	Description string    `db:"description" json:"description"`
-	IsDefault   bool      `db:"is_default" json:"isDefault"`
-	CreatedAt   time.Time `db:"created_at" json:"createdAt"`
-	UpdatedAt   time.Time `db:"updated_at" json:"updatedAt"`
+	ID          uuid.UUID  `db:"id" json:"id"`
+	TenantID    uuid.UUID  `db:"tenant_id" json:"tenantId"`
+	Name        string     `db:"name" json:"name"`
+	Description string     `db:"description" json:"description"`
+	IsDefault   bool       `db:"is_default" json:"isDefault"`
+	CreatedAt   time.Time  `db:"created_at" json:"createdAt"`
+	UpdatedAt   time.Time  `db:"updated_at" json:"updatedAt"`
+	DeletedAt   *time.Time `db:"deleted_at" json:"deletedAt,omitempty"`
 }
 
 type TenantRoleClaim struct {

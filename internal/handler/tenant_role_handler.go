@@ -3,11 +3,11 @@ package handler
 import (
 	"net/http"
 
-	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 	"github.com/creafly/identity/internal/domain/service"
 	"github.com/creafly/identity/internal/i18n"
 	"github.com/creafly/identity/internal/middleware"
+	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 type TenantRoleHandler struct {
@@ -102,7 +102,9 @@ func (h *TenantRoleHandler) List(c *gin.Context) {
 		return
 	}
 
-	roles, err := h.tenantRoleService.ListByTenant(c.Request.Context(), tenantID)
+	includeDeleted := c.DefaultQuery("includeDeleted", "false") == "true"
+
+	roles, err := h.tenantRoleService.ListByTenant(c.Request.Context(), tenantID, includeDeleted)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": messages.Errors.InternalError})
 		return
@@ -174,6 +176,28 @@ func (h *TenantRoleHandler) Delete(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": messages.Role.Deleted})
+}
+
+func (h *TenantRoleHandler) Restore(c *gin.Context) {
+	locale := middleware.GetLocale(c)
+	messages := i18n.GetMessages(locale)
+
+	id, err := uuid.Parse(c.Param("roleId"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": messages.Errors.ValidationFailed})
+		return
+	}
+
+	if err := h.tenantRoleService.Restore(c.Request.Context(), id); err != nil {
+		if err == service.ErrTenantRoleNotFound {
+			c.JSON(http.StatusNotFound, gin.H{"error": messages.Role.NotFound})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"error": messages.Errors.InternalError})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": messages.Role.Restored})
 }
 
 func (h *TenantRoleHandler) AssignClaim(c *gin.Context) {

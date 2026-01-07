@@ -5,9 +5,9 @@ import (
 	"errors"
 	"time"
 
-	"github.com/google/uuid"
 	"github.com/creafly/identity/internal/domain/entity"
 	"github.com/creafly/identity/internal/domain/repository"
+	"github.com/google/uuid"
 )
 
 var (
@@ -22,7 +22,8 @@ type TenantRoleService interface {
 	GetByName(ctx context.Context, tenantID uuid.UUID, name string) (*entity.TenantRole, error)
 	Update(ctx context.Context, id uuid.UUID, input UpdateTenantRoleInput) (*entity.TenantRole, error)
 	Delete(ctx context.Context, id uuid.UUID) error
-	ListByTenant(ctx context.Context, tenantID uuid.UUID) ([]*entity.TenantRole, error)
+	Restore(ctx context.Context, id uuid.UUID) error
+	ListByTenant(ctx context.Context, tenantID uuid.UUID, includeDeleted bool) ([]*entity.TenantRole, error)
 
 	AddClaim(ctx context.Context, tenantRoleID, claimID uuid.UUID) error
 	RemoveClaim(ctx context.Context, tenantRoleID, claimID uuid.UUID) error
@@ -134,8 +135,16 @@ func (s *tenantRoleService) Delete(ctx context.Context, id uuid.UUID) error {
 	return s.repo.Delete(ctx, id)
 }
 
-func (s *tenantRoleService) ListByTenant(ctx context.Context, tenantID uuid.UUID) ([]*entity.TenantRole, error) {
-	return s.repo.ListByTenant(ctx, tenantID)
+func (s *tenantRoleService) Restore(ctx context.Context, id uuid.UUID) error {
+	_, err := s.repo.GetByIDIncludeDeleted(ctx, id)
+	if err != nil {
+		return ErrTenantRoleNotFound
+	}
+	return s.repo.Restore(ctx, id)
+}
+
+func (s *tenantRoleService) ListByTenant(ctx context.Context, tenantID uuid.UUID, includeDeleted bool) ([]*entity.TenantRole, error) {
+	return s.repo.ListByTenant(ctx, tenantID, includeDeleted)
 }
 
 func (s *tenantRoleService) AddClaim(ctx context.Context, tenantRoleID, claimID uuid.UUID) error {

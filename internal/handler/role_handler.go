@@ -4,11 +4,11 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 	"github.com/creafly/identity/internal/domain/service"
 	"github.com/creafly/identity/internal/i18n"
 	"github.com/creafly/identity/internal/middleware"
+	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 type RoleHandler struct {
@@ -100,7 +100,9 @@ func (h *RoleHandler) List(c *gin.Context) {
 		}
 	}
 
-	roles, err := h.roleService.List(c.Request.Context(), offset, limit)
+	includeDeleted := c.DefaultQuery("includeDeleted", "false") == "true"
+
+	roles, err := h.roleService.List(c.Request.Context(), offset, limit, includeDeleted)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": messages.Errors.InternalError})
 		return
@@ -172,6 +174,28 @@ func (h *RoleHandler) Delete(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": messages.Role.Deleted})
+}
+
+func (h *RoleHandler) Restore(c *gin.Context) {
+	locale := middleware.GetLocale(c)
+	messages := i18n.GetMessages(locale)
+
+	id, err := uuid.Parse(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": messages.Errors.ValidationFailed})
+		return
+	}
+
+	if err := h.roleService.Restore(c.Request.Context(), id); err != nil {
+		if err == service.ErrRoleNotFound {
+			c.JSON(http.StatusNotFound, gin.H{"error": messages.Role.NotFound})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"error": messages.Errors.InternalError})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": messages.Role.Restored})
 }
 
 func (h *RoleHandler) AssignToUser(c *gin.Context) {

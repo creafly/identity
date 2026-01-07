@@ -5,9 +5,9 @@ import (
 	"errors"
 	"time"
 
-	"github.com/google/uuid"
 	"github.com/creafly/identity/internal/domain/entity"
 	"github.com/creafly/identity/internal/domain/repository"
+	"github.com/google/uuid"
 )
 
 var (
@@ -22,7 +22,8 @@ type RoleService interface {
 	GetByName(ctx context.Context, name string) (*entity.Role, error)
 	Update(ctx context.Context, id uuid.UUID, input UpdateRoleInput) (*entity.Role, error)
 	Delete(ctx context.Context, id uuid.UUID) error
-	List(ctx context.Context, offset, limit int) ([]*entity.Role, error)
+	Restore(ctx context.Context, id uuid.UUID) error
+	List(ctx context.Context, offset, limit int, includeDeleted bool) ([]*entity.Role, error)
 	AssignToUser(ctx context.Context, userID, roleID uuid.UUID) error
 	RemoveFromUser(ctx context.Context, userID, roleID uuid.UUID) error
 	GetUserRoles(ctx context.Context, userID uuid.UUID) ([]*entity.Role, error)
@@ -117,8 +118,16 @@ func (s *roleService) Delete(ctx context.Context, id uuid.UUID) error {
 	return s.repo.Delete(ctx, id)
 }
 
-func (s *roleService) List(ctx context.Context, offset, limit int) ([]*entity.Role, error) {
-	return s.repo.List(ctx, offset, limit)
+func (s *roleService) Restore(ctx context.Context, id uuid.UUID) error {
+	_, err := s.repo.GetByIDIncludeDeleted(ctx, id)
+	if err != nil {
+		return ErrRoleNotFound
+	}
+	return s.repo.Restore(ctx, id)
+}
+
+func (s *roleService) List(ctx context.Context, offset, limit int, includeDeleted bool) ([]*entity.Role, error) {
+	return s.repo.List(ctx, offset, limit, includeDeleted)
 }
 
 func (s *roleService) AssignToUser(ctx context.Context, userID, roleID uuid.UUID) error {

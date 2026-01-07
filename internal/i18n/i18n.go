@@ -78,6 +78,7 @@ type RoleMessages struct {
 	Created       string `json:"created"`
 	Updated       string `json:"updated"`
 	Deleted       string `json:"deleted"`
+	Restored      string `json:"restored"`
 	NotFound      string `json:"notFound"`
 	AlreadyExists string `json:"alreadyExists"`
 	Assigned      string `json:"assigned"`
@@ -231,6 +232,7 @@ func getHardcodedFallback() *Messages {
 			Created:       "Role created successfully",
 			Updated:       "Role updated successfully",
 			Deleted:       "Role deleted successfully",
+			Restored:      "Role restored successfully",
 			NotFound:      "Role not found",
 			AlreadyExists: "Role with this name already exists",
 			Assigned:      "Role assigned successfully",

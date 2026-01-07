@@ -296,6 +296,7 @@ func (a *App) initHttpRouting() {
 				tenantRolesManage.POST("", tenantRoleHandler.Create)
 				tenantRolesManage.PUT("/:roleId", tenantRoleHandler.Update)
 				tenantRolesManage.DELETE("/:roleId", tenantRoleHandler.Delete)
+				tenantRolesManage.POST("/:roleId/restore", tenantRoleHandler.Restore)
 				tenantRolesManage.POST("/:roleId/claims", tenantRoleHandler.AssignClaim)
 				tenantRolesManage.DELETE("/:roleId/claims/:claimId", tenantRoleHandler.RemoveClaim)
 				tenantRolesManage.PUT("/:roleId/claims", tenantRoleHandler.BatchUpdateClaims)
@@ -330,6 +331,7 @@ func (a *App) initHttpRouting() {
 				adminRolesManage.POST("", roleHandler.Create)
 				adminRolesManage.PUT("/:id", roleHandler.Update)
 				adminRolesManage.DELETE("/:id", roleHandler.Delete)
+				adminRolesManage.POST("/:id/restore", roleHandler.Restore)
 				adminRolesManage.POST("/:id/claims", claimHandler.AssignToRole)
 				adminRolesManage.DELETE("/:id/claims/:claimId", claimHandler.RemoveFromRole)
 			}
