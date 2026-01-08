@@ -230,7 +230,12 @@ VALUES
     ('10000000-0000-0000-0000-000000000104', 'push:delete', NOW()),
     ('10000000-0000-0000-0000-000000000105', 'push:manage', NOW()),
     ('10000000-0000-0000-0000-000000000111', 'tenants:view', NOW()),
-    ('10000000-0000-0000-0000-000000000112', 'tenants:manage', NOW())
+    ('10000000-0000-0000-0000-000000000112', 'tenants:manage', NOW()),
+    ('10000000-0000-0000-0000-000000000121', 'tenant:secrets:view', NOW()),
+    ('10000000-0000-0000-0000-000000000122', 'tenant:secrets:create', NOW()),
+    ('10000000-0000-0000-0000-000000000123', 'tenant:secrets:edit', NOW()),
+    ('10000000-0000-0000-0000-000000000124', 'tenant:secrets:delete', NOW()),
+    ('10000000-0000-0000-0000-000000000125', 'tenant:secrets:manage', NOW())
 ON CONFLICT (value) DO NOTHING;
 
 INSERT INTO role_claims (id, role_id, claim_id, created_at)

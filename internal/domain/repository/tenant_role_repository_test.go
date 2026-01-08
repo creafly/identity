@@ -4,8 +4,8 @@ import (
 	"context"
 	"testing"
 
-	"github.com/google/uuid"
 	"github.com/creafly/identity/internal/testutil"
+	"github.com/google/uuid"
 )
 
 func TestTenantRoleRepository_Create(t *testing.T) {
@@ -164,7 +164,7 @@ func TestTenantRoleRepository_ListByTenant(t *testing.T) {
 		_ = repo.Create(ctx, role1)
 		_ = repo.Create(ctx, role2)
 
-		roles, err := repo.ListByTenant(ctx, tenant.ID)
+		roles, err := repo.ListByTenant(ctx, tenant.ID, false)
 		if err != nil {
 			t.Errorf("ListByTenant() error = %v", err)
 			return

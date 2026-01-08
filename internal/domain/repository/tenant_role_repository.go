@@ -255,6 +255,7 @@ func (r *tenantRoleRepository) CreateDefaultRoles(ctx context.Context, tenantID 
 				"tenant:view", "tenant:update", "tenant:manage",
 				"tenant:roles:view", "tenant:roles:manage",
 				"tenant:members:view", "tenant:members:manage",
+				"tenant:secrets:view", "tenant:secrets:create", "tenant:secrets:edit", "tenant:secrets:delete", "tenant:secrets:manage",
 				"branding:view", "branding:update",
 				"analytics:view",
 				"email:generate", "email:preview",

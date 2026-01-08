@@ -7,11 +7,11 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 	"github.com/creafly/identity/internal/domain/entity"
 	"github.com/creafly/identity/internal/domain/service"
 	"github.com/creafly/identity/internal/testutil"
+	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 type TenantRoleServiceMock struct {
@@ -20,7 +20,8 @@ type TenantRoleServiceMock struct {
 	GetByNameFunc          func(ctx context.Context, tenantID uuid.UUID, name string) (*entity.TenantRole, error)
 	UpdateFunc             func(ctx context.Context, id uuid.UUID, input service.UpdateTenantRoleInput) (*entity.TenantRole, error)
 	DeleteFunc             func(ctx context.Context, id uuid.UUID) error
-	ListByTenantFunc       func(ctx context.Context, tenantID uuid.UUID) ([]*entity.TenantRole, error)
+	RestoreFunc            func(ctx context.Context, id uuid.UUID) error
+	ListByTenantFunc       func(ctx context.Context, tenantID uuid.UUID, includeDeleted bool) ([]*entity.TenantRole, error)
 	AddClaimFunc           func(ctx context.Context, tenantRoleID, claimID uuid.UUID) error
 	RemoveClaimFunc        func(ctx context.Context, tenantRoleID, claimID uuid.UUID) error
 	GetRoleClaimsFunc      func(ctx context.Context, tenantRoleID uuid.UUID) ([]*entity.Claim, error)
@@ -69,9 +70,16 @@ func (m *TenantRoleServiceMock) Delete(ctx context.Context, id uuid.UUID) error 
 	return nil
 }
 
-func (m *TenantRoleServiceMock) ListByTenant(ctx context.Context, tenantID uuid.UUID) ([]*entity.TenantRole, error) {
+func (m *TenantRoleServiceMock) Restore(ctx context.Context, id uuid.UUID) error {
+	if m.RestoreFunc != nil {
+		return m.RestoreFunc(ctx, id)
+	}
+	return nil
+}
+
+func (m *TenantRoleServiceMock) ListByTenant(ctx context.Context, tenantID uuid.UUID, includeDeleted bool) ([]*entity.TenantRole, error) {
 	if m.ListByTenantFunc != nil {
-		return m.ListByTenantFunc(ctx, tenantID)
+		return m.ListByTenantFunc(ctx, tenantID, includeDeleted)
 	}
 	return []*entity.TenantRole{}, nil
 }
@@ -274,7 +282,7 @@ func TestTenantRoleHandler_List(t *testing.T) {
 	t.Run("list roles", func(t *testing.T) {
 		tenantID := uuid.New()
 		roles := []*entity.TenantRole{testutil.NewTestTenantRole(tenantID), testutil.NewTestTenantRole(tenantID)}
-		svc.ListByTenantFunc = func(ctx context.Context, tid uuid.UUID) ([]*entity.TenantRole, error) {
+		svc.ListByTenantFunc = func(ctx context.Context, tid uuid.UUID, includeDeleted bool) ([]*entity.TenantRole, error) {
 			return roles, nil
 		}
 

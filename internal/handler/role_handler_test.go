@@ -8,11 +8,11 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 	"github.com/creafly/identity/internal/domain/entity"
 	"github.com/creafly/identity/internal/domain/service"
 	"github.com/creafly/identity/internal/testutil"
+	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 type RoleServiceMock struct {
@@ -21,7 +21,8 @@ type RoleServiceMock struct {
 	GetByNameFunc             func(ctx context.Context, name string) (*entity.Role, error)
 	UpdateFunc                func(ctx context.Context, id uuid.UUID, input service.UpdateRoleInput) (*entity.Role, error)
 	DeleteFunc                func(ctx context.Context, id uuid.UUID) error
-	ListFunc                  func(ctx context.Context, offset, limit int) ([]*entity.Role, error)
+	RestoreFunc               func(ctx context.Context, id uuid.UUID) error
+	ListFunc                  func(ctx context.Context, offset, limit int, includeDeleted bool) ([]*entity.Role, error)
 	AssignToUserFunc          func(ctx context.Context, userID, roleID uuid.UUID) error
 	RemoveFromUserFunc        func(ctx context.Context, userID, roleID uuid.UUID) error
 	GetUserRolesFunc          func(ctx context.Context, userID uuid.UUID) ([]*entity.Role, error)
@@ -63,9 +64,16 @@ func (m *RoleServiceMock) Delete(ctx context.Context, id uuid.UUID) error {
 	return nil
 }
 
-func (m *RoleServiceMock) List(ctx context.Context, offset, limit int) ([]*entity.Role, error) {
+func (m *RoleServiceMock) Restore(ctx context.Context, id uuid.UUID) error {
+	if m.RestoreFunc != nil {
+		return m.RestoreFunc(ctx, id)
+	}
+	return nil
+}
+
+func (m *RoleServiceMock) List(ctx context.Context, offset, limit int, includeDeleted bool) ([]*entity.Role, error) {
 	if m.ListFunc != nil {
-		return m.ListFunc(ctx, offset, limit)
+		return m.ListFunc(ctx, offset, limit, includeDeleted)
 	}
 	return []*entity.Role{}, nil
 }
@@ -278,7 +286,7 @@ func TestRoleHandler_List(t *testing.T) {
 
 	t.Run("list roles", func(t *testing.T) {
 		roles := []*entity.Role{testutil.NewTestRole(), testutil.NewTestRole()}
-		roleSvc.ListFunc = func(ctx context.Context, offset, limit int) ([]*entity.Role, error) {
+		roleSvc.ListFunc = func(ctx context.Context, offset, limit int, includeDeleted bool) ([]*entity.Role, error) {
 			return roles, nil
 		}
 

@@ -5,8 +5,8 @@ import (
 	"database/sql"
 	"sync"
 
-	"github.com/google/uuid"
 	"github.com/creafly/identity/internal/domain/entity"
+	"github.com/google/uuid"
 )
 
 type RoleRepositoryMock struct {
@@ -30,6 +30,16 @@ func (m *RoleRepositoryMock) Create(ctx context.Context, role *entity.Role) erro
 }
 
 func (m *RoleRepositoryMock) GetByID(ctx context.Context, id uuid.UUID) (*entity.Role, error) {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+	role, ok := m.roles[id]
+	if !ok {
+		return nil, sql.ErrNoRows
+	}
+	return role, nil
+}
+
+func (m *RoleRepositoryMock) GetByIDIncludeDeleted(ctx context.Context, id uuid.UUID) (*entity.Role, error) {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
 	role, ok := m.roles[id]
@@ -64,7 +74,11 @@ func (m *RoleRepositoryMock) Delete(ctx context.Context, id uuid.UUID) error {
 	return nil
 }
 
-func (m *RoleRepositoryMock) List(ctx context.Context, offset, limit int) ([]*entity.Role, error) {
+func (m *RoleRepositoryMock) Restore(ctx context.Context, id uuid.UUID) error {
+	return nil
+}
+
+func (m *RoleRepositoryMock) List(ctx context.Context, offset, limit int, includeDeleted bool) ([]*entity.Role, error) {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
 	var roles []*entity.Role

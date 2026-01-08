@@ -796,11 +796,39 @@ func (h *TenantHandler) ValidateTenantAccess(c *gin.Context) {
 		return
 	}
 
+	if !isMember {
+		c.JSON(http.StatusOK, gin.H{
+			"valid":    false,
+			"isMember": false,
+			"tenantId": tenantID.String(),
+			"userId":   userID.String(),
+		})
+		return
+	}
+
+	userClaims, err := h.tenantRoleService.GetUserClaims(c.Request.Context(), userID, tenantID)
+	if err != nil {
+		c.JSON(http.StatusOK, gin.H{
+			"valid":    true,
+			"isMember": true,
+			"tenantId": tenantID.String(),
+			"userId":   userID.String(),
+			"claims":   []string{},
+		})
+		return
+	}
+
+	claimValues := make([]string, 0, len(userClaims))
+	for _, claim := range userClaims {
+		claimValues = append(claimValues, claim.Value)
+	}
+
 	c.JSON(http.StatusOK, gin.H{
-		"valid":    isMember,
-		"isMember": isMember,
+		"valid":    true,
+		"isMember": true,
 		"tenantId": tenantID.String(),
 		"userId":   userID.String(),
+		"claims":   claimValues,
 	})
 }
 

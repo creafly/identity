@@ -5,8 +5,8 @@ import (
 	"database/sql"
 	"sync"
 
-	"github.com/google/uuid"
 	"github.com/creafly/identity/internal/domain/entity"
+	"github.com/google/uuid"
 )
 
 type TenantRoleRepositoryMock struct {
@@ -43,6 +43,16 @@ func (m *TenantRoleRepositoryMock) GetByID(ctx context.Context, id uuid.UUID) (*
 	return role, nil
 }
 
+func (m *TenantRoleRepositoryMock) GetByIDIncludeDeleted(ctx context.Context, id uuid.UUID) (*entity.TenantRole, error) {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+	role, ok := m.roles[id]
+	if !ok {
+		return nil, sql.ErrNoRows
+	}
+	return role, nil
+}
+
 func (m *TenantRoleRepositoryMock) GetByName(ctx context.Context, tenantID uuid.UUID, name string) (*entity.TenantRole, error) {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
@@ -68,7 +78,11 @@ func (m *TenantRoleRepositoryMock) Delete(ctx context.Context, id uuid.UUID) err
 	return nil
 }
 
-func (m *TenantRoleRepositoryMock) ListByTenant(ctx context.Context, tenantID uuid.UUID) ([]*entity.TenantRole, error) {
+func (m *TenantRoleRepositoryMock) Restore(ctx context.Context, id uuid.UUID) error {
+	return nil
+}
+
+func (m *TenantRoleRepositoryMock) ListByTenant(ctx context.Context, tenantID uuid.UUID, includeDeleted bool) ([]*entity.TenantRole, error) {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
 	var result []*entity.TenantRole

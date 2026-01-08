@@ -209,8 +209,9 @@ func (m *AuthRoleServiceMock) GetByName(ctx context.Context, name string) (*enti
 func (m *AuthRoleServiceMock) Update(ctx context.Context, id uuid.UUID, input service.UpdateRoleInput) (*entity.Role, error) {
 	return nil, nil
 }
-func (m *AuthRoleServiceMock) Delete(ctx context.Context, id uuid.UUID) error { return nil }
-func (m *AuthRoleServiceMock) List(ctx context.Context, offset, limit int) ([]*entity.Role, error) {
+func (m *AuthRoleServiceMock) Delete(ctx context.Context, id uuid.UUID) error  { return nil }
+func (m *AuthRoleServiceMock) Restore(ctx context.Context, id uuid.UUID) error { return nil }
+func (m *AuthRoleServiceMock) List(ctx context.Context, offset, limit int, includeDeleted bool) ([]*entity.Role, error) {
 	return nil, nil
 }
 func (m *AuthRoleServiceMock) AssignToUser(ctx context.Context, userID, roleID uuid.UUID) error {
