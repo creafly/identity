@@ -49,7 +49,7 @@ func SetupTestDB(t *testing.T) *TestDB {
 	}
 
 	if err := runMigrations(db); err != nil {
-		db.Close()
+		_ = db.Close()
 		t.Fatalf("failed to run migrations: %v", err)
 	}
 
@@ -81,7 +81,7 @@ func (tdb *TestDB) Cleanup(t *testing.T) {
 		_, _ = tdb.DB.Exec("DELETE FROM users")
 		_, _ = tdb.DB.Exec("DELETE FROM tenants")
 
-		tdb.DB.Close()
+		_ = tdb.DB.Close()
 	}
 }
 

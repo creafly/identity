@@ -127,7 +127,11 @@ func validateUsername(fl validator.FieldLevel) bool {
 		return false
 	}
 	for _, c := range username {
-		if !((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '_' || c == '-') {
+		isLower := c >= 'a' && c <= 'z'
+		isUpper := c >= 'A' && c <= 'Z'
+		isDigit := c >= '0' && c <= '9'
+		isAllowed := isLower || isUpper || isDigit || c == '_' || c == '-'
+		if !isAllowed {
 			return false
 		}
 	}

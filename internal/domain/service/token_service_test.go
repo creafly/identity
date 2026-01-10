@@ -235,11 +235,11 @@ func TestTokenClaims(t *testing.T) {
 		t.Errorf("issuer mismatch: got %v, want identity-service", claims.Issuer)
 	}
 
-	if claims.ExpiresAt.Time.Before(time.Now()) {
+	if claims.ExpiresAt.Before(time.Now()) {
 		t.Error("token should not be expired")
 	}
 
-	if claims.IssuedAt.Time.After(time.Now()) {
+	if claims.IssuedAt.After(time.Now()) {
 		t.Error("issued at should not be in the future")
 	}
 }

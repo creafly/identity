@@ -74,7 +74,7 @@ func (c *notificationsClient) CreateInvitation(ctx context.Context, input Create
 	if err != nil {
 		return nil, ErrNotificationsServiceUnavailable
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode >= 500 {
 		return nil, ErrNotificationsServiceUnavailable
@@ -115,7 +115,7 @@ func (c *notificationsClient) CancelInvitation(ctx context.Context, invitationID
 	if err != nil {
 		return ErrNotificationsServiceUnavailable
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode == http.StatusNotFound {
 		return ErrInvitationNotFound

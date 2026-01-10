@@ -98,7 +98,7 @@ func (sp *serviceProvider) GetDB() *sqlx.DB {
 		sp.db = db
 
 		closer.Bind(func() {
-			sp.db.Close()
+			_ = sp.db.Close()
 		})
 	}
 	return sp.db
@@ -114,7 +114,7 @@ func (sp *serviceProvider) GetRedisClient() *redis.Client {
 		sp.redisClient = client
 
 		closer.Bind(func() {
-			sp.redisClient.Close()
+			_ = sp.redisClient.Close()
 		})
 	}
 	return sp.redisClient
