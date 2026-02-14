@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/creafly/identity/internal/testutil"
-	"github.com/google/uuid"
+	"github.com/creafly/identity/internal/utils"
 )
 
 func TestTenantRoleRepository_Create(t *testing.T) {
@@ -59,7 +59,7 @@ func TestTenantRoleRepository_GetByID(t *testing.T) {
 	})
 
 	t.Run("non-existing role", func(t *testing.T) {
-		_, err := repo.GetByID(ctx, uuid.New())
+		_, err := repo.GetByID(ctx, utils.GenerateUUID())
 		if err == nil {
 			t.Error("GetByID() expected error for non-existing role")
 		}

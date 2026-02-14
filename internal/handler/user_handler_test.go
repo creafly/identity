@@ -7,11 +7,12 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 	"github.com/creafly/identity/internal/domain/entity"
 	"github.com/creafly/identity/internal/domain/service"
 	"github.com/creafly/identity/internal/testutil"
+	"github.com/creafly/identity/internal/utils"
+	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 type UserServiceMock struct {
@@ -175,7 +176,7 @@ func TestUserHandler_GetByID(t *testing.T) {
 			return nil, service.ErrUserNotFound
 		}
 
-		req := httptest.NewRequest(http.MethodGet, "/users/"+uuid.New().String(), nil)
+		req := httptest.NewRequest(http.MethodGet, "/users/"+utils.GenerateUUID().String(), nil)
 		w := httptest.NewRecorder()
 
 		router.ServeHTTP(w, req)
@@ -191,7 +192,7 @@ func TestUserHandler_Block(t *testing.T) {
 	router := setupUserRouter(svc)
 
 	t.Run("missing userID in context", func(t *testing.T) {
-		userID := uuid.New()
+		userID := utils.GenerateUUID()
 		body := `{"reason": "Spam"}`
 		req := httptest.NewRequest(http.MethodPost, "/users/"+userID.String()+"/block", bytes.NewBufferString(body))
 		req.Header.Set("Content-Type", "application/json")
@@ -205,7 +206,7 @@ func TestUserHandler_Block(t *testing.T) {
 	})
 
 	t.Run("missing reason", func(t *testing.T) {
-		userID := uuid.New()
+		userID := utils.GenerateUUID()
 		body := `{}`
 		req := httptest.NewRequest(http.MethodPost, "/users/"+userID.String()+"/block", bytes.NewBufferString(body))
 		req.Header.Set("Content-Type", "application/json")
@@ -228,7 +229,7 @@ func TestUserHandler_Unblock(t *testing.T) {
 			return nil
 		}
 
-		userID := uuid.New()
+		userID := utils.GenerateUUID()
 		req := httptest.NewRequest(http.MethodPost, "/users/"+userID.String()+"/unblock", nil)
 		w := httptest.NewRecorder()
 
@@ -244,7 +245,7 @@ func TestUserHandler_Unblock(t *testing.T) {
 			return service.ErrUserNotFound
 		}
 
-		userID := uuid.New()
+		userID := utils.GenerateUUID()
 		req := httptest.NewRequest(http.MethodPost, "/users/"+userID.String()+"/unblock", nil)
 		w := httptest.NewRecorder()
 

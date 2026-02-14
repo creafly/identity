@@ -8,11 +8,12 @@ import (
 	"errors"
 	"time"
 
+	"github.com/creafly/outbox"
+	"golang.org/x/crypto/bcrypt"
+
 	"github.com/creafly/identity/internal/domain/entity"
 	"github.com/creafly/identity/internal/domain/repository"
-	"github.com/creafly/outbox"
-	"github.com/google/uuid"
-	"golang.org/x/crypto/bcrypt"
+	"github.com/creafly/identity/internal/utils"
 )
 
 var (
@@ -61,7 +62,7 @@ func (s *passwordResetService) RequestPasswordReset(ctx context.Context, email s
 	tokenHash := hex.EncodeToString(hash[:])
 
 	token := &entity.PasswordResetToken{
-		ID:        uuid.New(),
+		ID:        utils.GenerateUUID(),
 		UserID:    user.ID,
 		TokenHash: tokenHash,
 		ExpiresAt: time.Now().Add(1 * time.Hour),

@@ -46,6 +46,7 @@ type ErrorMessages struct {
 	InvalidToken        string `json:"invalidToken"`
 	AccountLocked       string `json:"accountLocked"`
 	RegistrationFailed  string `json:"registrationFailed"`
+	SuspiciousActivity  string `json:"suspiciousActivity"`
 }
 
 type AuthMessages struct {
@@ -203,6 +204,7 @@ func getHardcodedFallback() *Messages {
 			TokenExpired:        "Token expired",
 			InvalidToken:        "Invalid token",
 			AccountLocked:       "Account temporarily locked due to too many failed login attempts",
+			SuspiciousActivity:  "Suspicious activity detected. Please verify your identity.",
 		},
 		Auth: AuthMessages{
 			RegisterSuccess:  "Registration successful",

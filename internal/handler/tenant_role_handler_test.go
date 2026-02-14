@@ -10,6 +10,7 @@ import (
 	"github.com/creafly/identity/internal/domain/entity"
 	"github.com/creafly/identity/internal/domain/service"
 	"github.com/creafly/identity/internal/testutil"
+	"github.com/creafly/identity/internal/utils"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )
@@ -185,7 +186,7 @@ func TestTenantRoleHandler_Create(t *testing.T) {
 	router := setupTenantRoleRouter(svc)
 
 	t.Run("valid request", func(t *testing.T) {
-		tenantID := uuid.New()
+		tenantID := utils.GenerateUUID()
 		role := testutil.NewTestTenantRole(tenantID)
 		svc.CreateFunc = func(ctx context.Context, input service.CreateTenantRoleInput) (*entity.TenantRole, error) {
 			return role, nil
@@ -204,7 +205,7 @@ func TestTenantRoleHandler_Create(t *testing.T) {
 	})
 
 	t.Run("missing name", func(t *testing.T) {
-		tenantID := uuid.New()
+		tenantID := utils.GenerateUUID()
 		body := `{"description": "Some description"}`
 		req := httptest.NewRequest(http.MethodPost, "/tenants/"+tenantID.String()+"/roles", bytes.NewBufferString(body))
 		req.Header.Set("Content-Type", "application/json")
@@ -222,7 +223,7 @@ func TestTenantRoleHandler_Create(t *testing.T) {
 			return nil, service.ErrTenantRoleAlreadyExists
 		}
 
-		tenantID := uuid.New()
+		tenantID := utils.GenerateUUID()
 		body := `{"name": "manager"}`
 		req := httptest.NewRequest(http.MethodPost, "/tenants/"+tenantID.String()+"/roles", bytes.NewBufferString(body))
 		req.Header.Set("Content-Type", "application/json")
@@ -241,7 +242,7 @@ func TestTenantRoleHandler_GetByID(t *testing.T) {
 	router := setupTenantRoleRouter(svc)
 
 	t.Run("existing role", func(t *testing.T) {
-		tenantID := uuid.New()
+		tenantID := utils.GenerateUUID()
 		role := testutil.NewTestTenantRole(tenantID)
 		svc.GetByIDFunc = func(ctx context.Context, id uuid.UUID) (*entity.TenantRole, error) {
 			return role, nil
@@ -262,8 +263,8 @@ func TestTenantRoleHandler_GetByID(t *testing.T) {
 			return nil, service.ErrTenantRoleNotFound
 		}
 
-		tenantID := uuid.New()
-		roleID := uuid.New()
+		tenantID := utils.GenerateUUID()
+		roleID := utils.GenerateUUID()
 		req := httptest.NewRequest(http.MethodGet, "/tenants/"+tenantID.String()+"/roles/"+roleID.String(), nil)
 		w := httptest.NewRecorder()
 
@@ -280,7 +281,7 @@ func TestTenantRoleHandler_List(t *testing.T) {
 	router := setupTenantRoleRouter(svc)
 
 	t.Run("list roles", func(t *testing.T) {
-		tenantID := uuid.New()
+		tenantID := utils.GenerateUUID()
 		roles := []*entity.TenantRole{testutil.NewTestTenantRole(tenantID), testutil.NewTestTenantRole(tenantID)}
 		svc.ListByTenantFunc = func(ctx context.Context, tid uuid.UUID, includeDeleted bool) ([]*entity.TenantRole, error) {
 			return roles, nil
@@ -302,7 +303,7 @@ func TestTenantRoleHandler_Update(t *testing.T) {
 	router := setupTenantRoleRouter(svc)
 
 	t.Run("valid update", func(t *testing.T) {
-		tenantID := uuid.New()
+		tenantID := utils.GenerateUUID()
 		role := testutil.NewTestTenantRole(tenantID)
 		svc.UpdateFunc = func(ctx context.Context, id uuid.UUID, input service.UpdateTenantRoleInput) (*entity.TenantRole, error) {
 			return role, nil
@@ -325,8 +326,8 @@ func TestTenantRoleHandler_Update(t *testing.T) {
 			return nil, service.ErrTenantRoleNotFound
 		}
 
-		tenantID := uuid.New()
-		roleID := uuid.New()
+		tenantID := utils.GenerateUUID()
+		roleID := utils.GenerateUUID()
 		body := `{"name": "updated-name"}`
 		req := httptest.NewRequest(http.MethodPut, "/tenants/"+tenantID.String()+"/roles/"+roleID.String(), bytes.NewBufferString(body))
 		req.Header.Set("Content-Type", "application/json")
@@ -349,8 +350,8 @@ func TestTenantRoleHandler_Delete(t *testing.T) {
 			return nil
 		}
 
-		tenantID := uuid.New()
-		roleID := uuid.New()
+		tenantID := utils.GenerateUUID()
+		roleID := utils.GenerateUUID()
 		req := httptest.NewRequest(http.MethodDelete, "/tenants/"+tenantID.String()+"/roles/"+roleID.String(), nil)
 		w := httptest.NewRecorder()
 
@@ -366,8 +367,8 @@ func TestTenantRoleHandler_Delete(t *testing.T) {
 			return service.ErrTenantRoleNotFound
 		}
 
-		tenantID := uuid.New()
-		roleID := uuid.New()
+		tenantID := utils.GenerateUUID()
+		roleID := utils.GenerateUUID()
 		req := httptest.NewRequest(http.MethodDelete, "/tenants/"+tenantID.String()+"/roles/"+roleID.String(), nil)
 		w := httptest.NewRecorder()
 
@@ -383,8 +384,8 @@ func TestTenantRoleHandler_Delete(t *testing.T) {
 			return service.ErrCannotDeleteDefaultRole
 		}
 
-		tenantID := uuid.New()
-		roleID := uuid.New()
+		tenantID := utils.GenerateUUID()
+		roleID := utils.GenerateUUID()
 		req := httptest.NewRequest(http.MethodDelete, "/tenants/"+tenantID.String()+"/roles/"+roleID.String(), nil)
 		w := httptest.NewRecorder()
 
@@ -405,9 +406,9 @@ func TestTenantRoleHandler_AssignClaim(t *testing.T) {
 			return nil
 		}
 
-		tenantID := uuid.New()
-		roleID := uuid.New()
-		claimID := uuid.New()
+		tenantID := utils.GenerateUUID()
+		roleID := utils.GenerateUUID()
+		claimID := utils.GenerateUUID()
 		body := `{"claimId": "` + claimID.String() + `"}`
 		req := httptest.NewRequest(http.MethodPost, "/tenants/"+tenantID.String()+"/roles/"+roleID.String()+"/claims", bytes.NewBufferString(body))
 		req.Header.Set("Content-Type", "application/json")
@@ -430,9 +431,9 @@ func TestTenantRoleHandler_RemoveClaim(t *testing.T) {
 			return nil
 		}
 
-		tenantID := uuid.New()
-		roleID := uuid.New()
-		claimID := uuid.New()
+		tenantID := utils.GenerateUUID()
+		roleID := utils.GenerateUUID()
+		claimID := utils.GenerateUUID()
 		req := httptest.NewRequest(http.MethodDelete, "/tenants/"+tenantID.String()+"/roles/"+roleID.String()+"/claims/"+claimID.String(), nil)
 		w := httptest.NewRecorder()
 
@@ -454,8 +455,8 @@ func TestTenantRoleHandler_GetRoleClaims(t *testing.T) {
 			return claims, nil
 		}
 
-		tenantID := uuid.New()
-		roleID := uuid.New()
+		tenantID := utils.GenerateUUID()
+		roleID := utils.GenerateUUID()
 		req := httptest.NewRequest(http.MethodGet, "/tenants/"+tenantID.String()+"/roles/"+roleID.String()+"/claims", nil)
 		w := httptest.NewRecorder()
 
@@ -477,7 +478,7 @@ func TestTenantRoleHandler_GetAvailableClaims(t *testing.T) {
 			return claims, nil
 		}
 
-		tenantID := uuid.New()
+		tenantID := utils.GenerateUUID()
 		req := httptest.NewRequest(http.MethodGet, "/tenants/"+tenantID.String()+"/available-claims", nil)
 		w := httptest.NewRecorder()
 
@@ -498,10 +499,10 @@ func TestTenantRoleHandler_BatchUpdateClaims(t *testing.T) {
 			return nil
 		}
 
-		tenantID := uuid.New()
-		roleID := uuid.New()
-		claimID1 := uuid.New()
-		claimID2 := uuid.New()
+		tenantID := utils.GenerateUUID()
+		roleID := utils.GenerateUUID()
+		claimID1 := utils.GenerateUUID()
+		claimID2 := utils.GenerateUUID()
 		body := `{"assignClaimIds": ["` + claimID1.String() + `"], "removeClaimIds": ["` + claimID2.String() + `"]}`
 		req := httptest.NewRequest(http.MethodPatch, "/tenants/"+tenantID.String()+"/roles/"+roleID.String()+"/claims", bytes.NewBufferString(body))
 		req.Header.Set("Content-Type", "application/json")

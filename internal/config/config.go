@@ -28,6 +28,7 @@ type Config struct {
 	AccountLockout AccountLockoutConfig
 	TOTPLockout    TOTPLockoutConfig
 	InternalAPI    InternalAPIConfig
+	MLService      MLServiceConfig
 }
 
 type RateLimitConfig struct {
@@ -54,6 +55,12 @@ type TOTPLockoutConfig struct {
 type InternalAPIConfig struct {
 	APIKey          string
 	AllowedServices []string
+}
+
+type MLServiceConfig struct {
+	Enabled bool
+	BaseURL string
+	Timeout time.Duration
 }
 
 type NotificationsConfig struct {
@@ -240,6 +247,11 @@ func Load() *Config {
 		InternalAPI: InternalAPIConfig{
 			APIKey:          secrets.GetSecret("internal_api_key", "INTERNAL_API_KEY", ""),
 			AllowedServices: splitNonEmpty(getEnv("INTERNAL_ALLOWED_SERVICES", "notifications,agent,subscriptions"), ","),
+		},
+		MLService: MLServiceConfig{
+			Enabled: getEnv("ML_SERVICE_ENABLED", "false") == "true",
+			BaseURL: getEnv("ML_SERVICE_URL", "http://localhost:8090"),
+			Timeout: parseDuration(getEnv("ML_SERVICE_TIMEOUT", "5s")),
 		},
 	}
 }

@@ -8,6 +8,7 @@ import (
 	"github.com/creafly/identity/internal/config"
 	"github.com/creafly/identity/internal/domain/service"
 	"github.com/creafly/identity/internal/i18n"
+	"github.com/creafly/identity/internal/infra/mlservice"
 	"github.com/creafly/identity/internal/middleware"
 	"github.com/creafly/identity/internal/validator"
 	"github.com/creafly/logger"
@@ -26,6 +27,7 @@ type AuthHandler struct {
 	claimService             service.ClaimService
 	loginAttemptTracker      service.LoginAttemptTracker
 	totpAttemptTracker       service.TOTPAttemptTracker
+	mlClient                 *mlservice.Client
 }
 
 func NewAuthHandler(
@@ -39,6 +41,7 @@ func NewAuthHandler(
 	claimService service.ClaimService,
 	loginAttemptTracker service.LoginAttemptTracker,
 	totpAttemptTracker service.TOTPAttemptTracker,
+	mlClient *mlservice.Client,
 ) *AuthHandler {
 	return &AuthHandler{
 		cfg:                      cfg,
@@ -51,6 +54,7 @@ func NewAuthHandler(
 		claimService:             claimService,
 		loginAttemptTracker:      loginAttemptTracker,
 		totpAttemptTracker:       totpAttemptTracker,
+		mlClient:                 mlClient,
 	}
 }
 
@@ -215,25 +219,77 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		h.loginAttemptTracker.ClearAttempts(req.Email)
 	}
 
+	var anomalyResponse *mlservice.AnomalyCheckResponse
+	if h.mlClient != nil && h.mlClient.IsEnabled() {
+		failedAttempts := 0
+		if h.loginAttemptTracker != nil {
+			failedAttempts = h.loginAttemptTracker.GetAttempts(req.Email)
+		}
+
+		anomalyResponse, _ = h.mlClient.CheckAnomaly(c.Request.Context(), &mlservice.AnomalyCheckRequest{
+			UserID:             user.ID.String(),
+			TenantID:           "global",
+			IPAddress:          c.ClientIP(),
+			UserAgent:          c.GetHeader("User-Agent"),
+			Endpoint:           "/api/v1/auth/login",
+			Method:             "POST",
+			FailedAuthAttempts: failedAttempts,
+		})
+
+		if mlservice.ShouldBlockLogin(anomalyResponse) {
+			logger.Warn().
+				Str("userId", logger.MaskID(user.ID.String())).
+				Str("ip", c.ClientIP()).
+				Strs("reasons", anomalyResponse.Reasons).
+				Msg("Login blocked due to anomaly detection")
+
+			c.JSON(http.StatusForbidden, gin.H{
+				"error": messages.Errors.SuspiciousActivity,
+				"code":  "ANOMALY_DETECTED",
+			})
+			return
+		}
+	}
+
 	totpEnabled, err := h.totpService.IsEnabled(c.Request.Context(), user.ID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": messages.Errors.InternalError})
 		return
 	}
 
-	if totpEnabled {
+	require2FA := totpEnabled || mlservice.ShouldRequire2FA(anomalyResponse)
+
+	if require2FA {
 		tempToken, err := h.tokenService.GenerateTempToken(user.ID, user.Email)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": messages.Errors.InternalError})
 			return
 		}
 
-		c.JSON(http.StatusOK, gin.H{
+		response := gin.H{
 			"totpRequired": true,
 			"tempToken":    tempToken,
 			"message":      messages.TOTP.VerificationRequired,
-		})
+		}
+
+		if !totpEnabled && mlservice.ShouldRequire2FA(anomalyResponse) {
+			response["anomalyDetected"] = true
+			response["message"] = messages.Errors.SuspiciousActivity
+		}
+
+		c.JSON(http.StatusOK, response)
 		return
+	}
+
+	if h.mlClient != nil && h.mlClient.IsEnabled() {
+		go func() {
+			_, _ = h.mlClient.UpdateProfile(c.Request.Context(), &mlservice.UpdateProfileRequest{
+				UserID:    user.ID.String(),
+				TenantID:  "global",
+				IPAddress: c.ClientIP(),
+				UserAgent: c.GetHeader("User-Agent"),
+			})
+		}()
 	}
 
 	accessToken, err := h.tokenService.GenerateAccessToken(user.ID, user.Email, []string{})

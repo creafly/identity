@@ -5,10 +5,12 @@ import (
 	"errors"
 	"time"
 
-	"github.com/creafly/identity/internal/domain/entity"
-	"github.com/creafly/identity/internal/domain/repository"
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
+
+	"github.com/creafly/identity/internal/domain/entity"
+	"github.com/creafly/identity/internal/domain/repository"
+	"github.com/creafly/identity/internal/utils"
 )
 
 const BcryptCost = 12
@@ -86,7 +88,7 @@ func (s *userService) Register(ctx context.Context, input RegisterInput) (*entit
 	}
 
 	user := &entity.User{
-		ID:           uuid.New(),
+		ID:           utils.GenerateUUID(),
 		Email:        input.Email,
 		Username:     username,
 		PasswordHash: string(hashedPassword),

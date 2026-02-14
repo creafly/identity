@@ -7,6 +7,7 @@ import (
 
 	"github.com/creafly/identity/internal/domain/entity"
 	"github.com/creafly/identity/internal/domain/repository"
+	"github.com/creafly/identity/internal/utils"
 	"github.com/google/uuid"
 )
 
@@ -67,7 +68,7 @@ func (s *tenantRoleService) Create(ctx context.Context, input CreateTenantRoleIn
 	}
 
 	role := &entity.TenantRole{
-		ID:          uuid.New(),
+		ID:          utils.GenerateUUID(),
 		TenantID:    input.TenantID,
 		Name:        input.Name,
 		Description: input.Description,

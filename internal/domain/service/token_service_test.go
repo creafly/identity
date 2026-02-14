@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/creafly/identity/internal/config"
-	"github.com/google/uuid"
+	"github.com/creafly/identity/internal/utils"
 )
 
 type mockBlacklist struct {
@@ -55,7 +55,7 @@ func newTestTokenService() TokenService {
 func TestGenerateAccessToken(t *testing.T) {
 	svc := newTestTokenService()
 
-	userID := uuid.New()
+	userID := utils.GenerateUUID()
 	email := "test@example.com"
 	roles := []string{"admin", "user"}
 
@@ -89,7 +89,7 @@ func TestGenerateAccessToken(t *testing.T) {
 func TestGenerateRefreshToken(t *testing.T) {
 	svc := newTestTokenService()
 
-	userID := uuid.New()
+	userID := utils.GenerateUUID()
 
 	token, err := svc.GenerateRefreshToken(userID)
 	if err != nil {
@@ -113,7 +113,7 @@ func TestGenerateRefreshToken(t *testing.T) {
 func TestGenerateTempToken(t *testing.T) {
 	svc := newTestTokenService()
 
-	userID := uuid.New()
+	userID := utils.GenerateUUID()
 	email := "test@example.com"
 
 	token, err := svc.GenerateTempToken(userID, email)
@@ -207,7 +207,7 @@ func TestAccessTokenWithDifferentSecret(t *testing.T) {
 	}
 	svc2 := NewTokenService(cfg2, newMockBlacklist())
 
-	token, err := svc1.GenerateAccessToken(uuid.New(), "test@example.com", []string{"user"})
+	token, err := svc1.GenerateAccessToken(utils.GenerateUUID(), "test@example.com", []string{"user"})
 	if err != nil {
 		t.Fatalf("failed to generate token: %v", err)
 	}
@@ -221,7 +221,7 @@ func TestAccessTokenWithDifferentSecret(t *testing.T) {
 func TestTokenClaims(t *testing.T) {
 	svc := newTestTokenService()
 
-	userID := uuid.New()
+	userID := utils.GenerateUUID()
 	email := "user@example.com"
 	roles := []string{"admin", "moderator"}
 

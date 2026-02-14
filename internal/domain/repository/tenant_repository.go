@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/creafly/identity/internal/domain/entity"
+	"github.com/creafly/identity/internal/utils"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 )
@@ -106,7 +107,7 @@ func (r *tenantRepository) AddMember(ctx context.Context, tenantID, userID uuid.
 		VALUES ($1, $2, $3, NOW())
 		ON CONFLICT (tenant_id, user_id) DO NOTHING
 	`
-	_, err := r.db.ExecContext(ctx, query, uuid.New(), tenantID, userID)
+	_, err := r.db.ExecContext(ctx, query, utils.GenerateUUID(), tenantID, userID)
 	return err
 }
 

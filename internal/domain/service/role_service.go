@@ -5,9 +5,11 @@ import (
 	"errors"
 	"time"
 
+	"github.com/google/uuid"
+
 	"github.com/creafly/identity/internal/domain/entity"
 	"github.com/creafly/identity/internal/domain/repository"
-	"github.com/google/uuid"
+	"github.com/creafly/identity/internal/utils"
 )
 
 var (
@@ -55,7 +57,7 @@ func (s *roleService) Create(ctx context.Context, input CreateRoleInput) (*entit
 	}
 
 	role := &entity.Role{
-		ID:          uuid.New(),
+		ID:          utils.GenerateUUID(),
 		Name:        input.Name,
 		Description: input.Description,
 		CreatedAt:   time.Now(),

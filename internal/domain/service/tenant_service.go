@@ -7,9 +7,11 @@ import (
 	"strings"
 	"time"
 
+	"github.com/google/uuid"
+
 	"github.com/creafly/identity/internal/domain/entity"
 	"github.com/creafly/identity/internal/domain/repository"
-	"github.com/google/uuid"
+	"github.com/creafly/identity/internal/utils"
 )
 
 var (
@@ -77,7 +79,7 @@ func (s *tenantService) Create(ctx context.Context, input CreateTenantInput) (*e
 	}
 
 	tenant := &entity.Tenant{
-		ID:          uuid.New(),
+		ID:          utils.GenerateUUID(),
 		Name:        input.Name,
 		DisplayName: displayName,
 		Slug:        slug,

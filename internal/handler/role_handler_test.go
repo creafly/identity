@@ -11,6 +11,7 @@ import (
 	"github.com/creafly/identity/internal/domain/entity"
 	"github.com/creafly/identity/internal/domain/service"
 	"github.com/creafly/identity/internal/testutil"
+	"github.com/creafly/identity/internal/utils"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )
@@ -204,7 +205,7 @@ func TestRoleHandler_Update(t *testing.T) {
 		}
 
 		body := `{"name": "updated-name"}`
-		req := httptest.NewRequest(http.MethodPut, "/roles/"+uuid.New().String(), bytes.NewBufferString(body))
+		req := httptest.NewRequest(http.MethodPut, "/roles/"+utils.GenerateUUID().String(), bytes.NewBufferString(body))
 		req.Header.Set("Content-Type", "application/json")
 		w := httptest.NewRecorder()
 
@@ -221,7 +222,7 @@ func TestRoleHandler_Update(t *testing.T) {
 		}
 
 		body := `{"name": "existing-name"}`
-		req := httptest.NewRequest(http.MethodPut, "/roles/"+uuid.New().String(), bytes.NewBufferString(body))
+		req := httptest.NewRequest(http.MethodPut, "/roles/"+utils.GenerateUUID().String(), bytes.NewBufferString(body))
 		req.Header.Set("Content-Type", "application/json")
 		w := httptest.NewRecorder()
 
@@ -269,7 +270,7 @@ func TestRoleHandler_GetByID(t *testing.T) {
 			return nil, service.ErrRoleNotFound
 		}
 
-		req := httptest.NewRequest(http.MethodGet, "/roles/"+uuid.New().String(), nil)
+		req := httptest.NewRequest(http.MethodGet, "/roles/"+utils.GenerateUUID().String(), nil)
 		w := httptest.NewRecorder()
 
 		router.ServeHTTP(w, req)
@@ -316,7 +317,7 @@ func TestRoleHandler_Delete(t *testing.T) {
 			return nil
 		}
 
-		req := httptest.NewRequest(http.MethodDelete, "/roles/"+uuid.New().String(), nil)
+		req := httptest.NewRequest(http.MethodDelete, "/roles/"+utils.GenerateUUID().String(), nil)
 		w := httptest.NewRecorder()
 
 		router.ServeHTTP(w, req)
@@ -331,7 +332,7 @@ func TestRoleHandler_Delete(t *testing.T) {
 			return service.ErrRoleNotFound
 		}
 
-		req := httptest.NewRequest(http.MethodDelete, "/roles/"+uuid.New().String(), nil)
+		req := httptest.NewRequest(http.MethodDelete, "/roles/"+utils.GenerateUUID().String(), nil)
 		w := httptest.NewRecorder()
 
 		router.ServeHTTP(w, req)
@@ -351,8 +352,8 @@ func TestRoleHandler_AssignToUser(t *testing.T) {
 			return nil
 		}
 
-		userID := uuid.New()
-		roleID := uuid.New()
+		userID := utils.GenerateUUID()
+		roleID := utils.GenerateUUID()
 		body := `{"roleId": "` + roleID.String() + `"}`
 		req := httptest.NewRequest(http.MethodPost, "/users/"+userID.String()+"/roles", bytes.NewBufferString(body))
 		req.Header.Set("Content-Type", "application/json")
@@ -366,7 +367,7 @@ func TestRoleHandler_AssignToUser(t *testing.T) {
 	})
 
 	t.Run("invalid user id", func(t *testing.T) {
-		body := `{"roleId": "` + uuid.New().String() + `"}`
+		body := `{"roleId": "` + utils.GenerateUUID().String() + `"}`
 		req := httptest.NewRequest(http.MethodPost, "/users/invalid-uuid/roles", bytes.NewBufferString(body))
 		req.Header.Set("Content-Type", "application/json")
 		w := httptest.NewRecorder()
@@ -383,8 +384,8 @@ func TestRoleHandler_AssignToUser(t *testing.T) {
 			return service.ErrRoleNotFound
 		}
 
-		userID := uuid.New()
-		roleID := uuid.New()
+		userID := utils.GenerateUUID()
+		roleID := utils.GenerateUUID()
 		body := `{"roleId": "` + roleID.String() + `"}`
 		req := httptest.NewRequest(http.MethodPost, "/users/"+userID.String()+"/roles", bytes.NewBufferString(body))
 		req.Header.Set("Content-Type", "application/json")
@@ -407,8 +408,8 @@ func TestRoleHandler_RemoveFromUser(t *testing.T) {
 			return nil
 		}
 
-		userID := uuid.New()
-		roleID := uuid.New()
+		userID := utils.GenerateUUID()
+		roleID := utils.GenerateUUID()
 		req := httptest.NewRequest(http.MethodDelete, "/users/"+userID.String()+"/roles/"+roleID.String(), nil)
 		w := httptest.NewRecorder()
 
@@ -420,7 +421,7 @@ func TestRoleHandler_RemoveFromUser(t *testing.T) {
 	})
 
 	t.Run("invalid user id", func(t *testing.T) {
-		req := httptest.NewRequest(http.MethodDelete, "/users/invalid-uuid/roles/"+uuid.New().String(), nil)
+		req := httptest.NewRequest(http.MethodDelete, "/users/invalid-uuid/roles/"+utils.GenerateUUID().String(), nil)
 		w := httptest.NewRecorder()
 
 		router.ServeHTTP(w, req)
@@ -431,7 +432,7 @@ func TestRoleHandler_RemoveFromUser(t *testing.T) {
 	})
 
 	t.Run("invalid role id", func(t *testing.T) {
-		req := httptest.NewRequest(http.MethodDelete, "/users/"+uuid.New().String()+"/roles/invalid-uuid", nil)
+		req := httptest.NewRequest(http.MethodDelete, "/users/"+utils.GenerateUUID().String()+"/roles/invalid-uuid", nil)
 		w := httptest.NewRecorder()
 
 		router.ServeHTTP(w, req)
@@ -452,7 +453,7 @@ func TestRoleHandler_GetUserRoles(t *testing.T) {
 			return roles, nil
 		}
 
-		userID := uuid.New()
+		userID := utils.GenerateUUID()
 		req := httptest.NewRequest(http.MethodGet, "/users/"+userID.String()+"/roles", nil)
 		w := httptest.NewRecorder()
 

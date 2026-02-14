@@ -4,9 +4,9 @@ import (
 	"context"
 	"testing"
 
-	"github.com/google/uuid"
 	"github.com/creafly/identity/internal/testutil"
 	"github.com/creafly/identity/internal/testutil/mocks"
+	"github.com/creafly/identity/internal/utils"
 )
 
 func TestRoleService_Create(t *testing.T) {
@@ -59,7 +59,7 @@ func TestRoleService_GetByID(t *testing.T) {
 	})
 
 	t.Run("non-existing role", func(t *testing.T) {
-		_, err := svc.GetByID(ctx, uuid.New())
+		_, err := svc.GetByID(ctx, utils.GenerateUUID())
 		if err != ErrRoleNotFound {
 			t.Errorf("GetByID() error = %v, want %v", err, ErrRoleNotFound)
 		}
@@ -90,7 +90,7 @@ func TestRoleService_Update(t *testing.T) {
 	t.Run("update non-existing role", func(t *testing.T) {
 		newName := "test"
 		input := UpdateRoleInput{Name: &newName}
-		_, err := svc.Update(ctx, uuid.New(), input)
+		_, err := svc.Update(ctx, utils.GenerateUUID(), input)
 		if err != ErrRoleNotFound {
 			t.Errorf("Update() error = %v, want %v", err, ErrRoleNotFound)
 		}
@@ -113,7 +113,7 @@ func TestRoleService_Delete(t *testing.T) {
 	})
 
 	t.Run("delete non-existing role", func(t *testing.T) {
-		err := svc.Delete(ctx, uuid.New())
+		err := svc.Delete(ctx, utils.GenerateUUID())
 		if err != ErrRoleNotFound {
 			t.Errorf("Delete() error = %v, want %v", err, ErrRoleNotFound)
 		}
@@ -128,7 +128,7 @@ func TestRoleService_AssignToUser(t *testing.T) {
 	t.Run("assign existing role", func(t *testing.T) {
 		role := testutil.NewTestRole()
 		roleRepo.AddRole(role)
-		userID := uuid.New()
+		userID := utils.GenerateUUID()
 
 		err := svc.AssignToUser(ctx, userID, role.ID)
 		if err != nil {
@@ -137,8 +137,8 @@ func TestRoleService_AssignToUser(t *testing.T) {
 	})
 
 	t.Run("assign non-existing role", func(t *testing.T) {
-		userID := uuid.New()
-		err := svc.AssignToUser(ctx, userID, uuid.New())
+		userID := utils.GenerateUUID()
+		err := svc.AssignToUser(ctx, userID, utils.GenerateUUID())
 		if err != ErrRoleNotFound {
 			t.Errorf("AssignToUser() error = %v, want %v", err, ErrRoleNotFound)
 		}

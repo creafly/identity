@@ -11,6 +11,7 @@ import (
 	"github.com/creafly/identity/internal/config"
 	"github.com/creafly/identity/internal/domain/entity"
 	"github.com/creafly/identity/internal/domain/service"
+	"github.com/creafly/identity/internal/infra/mlservice"
 	"github.com/creafly/identity/internal/testutil"
 	"github.com/creafly/identity/internal/validator"
 	"github.com/gin-gonic/gin"
@@ -323,6 +324,7 @@ type authMocks struct {
 	claimSvc             *ClaimServiceMock
 	loginAttemptTracker  *LoginAttemptTrackerMock
 	totpAttemptTracker   *TOTPAttemptTrackerMock
+	mlClient             *mlservice.Client
 }
 
 func newAuthMocks() *authMocks {
@@ -337,13 +339,14 @@ func newAuthMocks() *authMocks {
 		claimSvc:             &ClaimServiceMock{},
 		loginAttemptTracker:  &LoginAttemptTrackerMock{},
 		totpAttemptTracker:   &TOTPAttemptTrackerMock{},
+		mlClient:             mlservice.NewClient(mlservice.Config{Enabled: false}),
 	}
 }
 
 func setupAuthRouter(m *authMocks) *gin.Engine {
 	gin.SetMode(gin.TestMode)
 	router := gin.New()
-	handler := NewAuthHandler(m.cfg, m.userSvc, m.tokenSvc, m.roleSvc, m.totpSvc, m.passwordResetSvc, m.emailVerificationSvc, m.claimSvc, m.loginAttemptTracker, m.totpAttemptTracker)
+	handler := NewAuthHandler(m.cfg, m.userSvc, m.tokenSvc, m.roleSvc, m.totpSvc, m.passwordResetSvc, m.emailVerificationSvc, m.claimSvc, m.loginAttemptTracker, m.totpAttemptTracker, m.mlClient)
 
 	router.POST("/auth/register", handler.Register)
 	router.POST("/auth/login", handler.Login)

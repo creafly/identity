@@ -4,9 +4,9 @@ import (
 	"context"
 	"testing"
 
-	"github.com/google/uuid"
 	"github.com/creafly/identity/internal/testutil"
 	"github.com/creafly/identity/internal/testutil/mocks"
+	"github.com/creafly/identity/internal/utils"
 )
 
 func TestClaimService_Create(t *testing.T) {
@@ -62,7 +62,7 @@ func TestClaimService_GetByID(t *testing.T) {
 	})
 
 	t.Run("non-existing claim", func(t *testing.T) {
-		_, err := svc.GetByID(ctx, uuid.New())
+		_, err := svc.GetByID(ctx, utils.GenerateUUID())
 		if err != ErrClaimNotFound {
 			t.Errorf("GetByID() error = %v, want %v", err, ErrClaimNotFound)
 		}
@@ -122,7 +122,7 @@ func TestClaimService_Delete(t *testing.T) {
 	})
 
 	t.Run("delete non-existing claim", func(t *testing.T) {
-		err := svc.Delete(ctx, uuid.New())
+		err := svc.Delete(ctx, utils.GenerateUUID())
 		if err != ErrClaimNotFound {
 			t.Errorf("Delete() error = %v, want %v", err, ErrClaimNotFound)
 		}
@@ -139,7 +139,7 @@ func TestClaimService_AssignToUser(t *testing.T) {
 	t.Run("assign existing claim to user", func(t *testing.T) {
 		claim := testutil.NewTestClaim()
 		claimRepo.AddClaim(claim)
-		userID := uuid.New()
+		userID := utils.GenerateUUID()
 
 		err := svc.AssignToUser(ctx, userID, claim.ID)
 		if err != nil {
@@ -148,8 +148,8 @@ func TestClaimService_AssignToUser(t *testing.T) {
 	})
 
 	t.Run("assign non-existing claim", func(t *testing.T) {
-		userID := uuid.New()
-		err := svc.AssignToUser(ctx, userID, uuid.New())
+		userID := utils.GenerateUUID()
+		err := svc.AssignToUser(ctx, userID, utils.GenerateUUID())
 		if err != ErrClaimNotFound {
 			t.Errorf("AssignToUser() error = %v, want %v", err, ErrClaimNotFound)
 		}
@@ -180,7 +180,7 @@ func TestClaimService_AssignToRole(t *testing.T) {
 		role := testutil.NewTestRole()
 		roleRepo.AddRole(role)
 
-		err := svc.AssignToRole(ctx, role.ID, uuid.New())
+		err := svc.AssignToRole(ctx, role.ID, utils.GenerateUUID())
 		if err != ErrClaimNotFound {
 			t.Errorf("AssignToRole() error = %v, want %v", err, ErrClaimNotFound)
 		}
@@ -190,7 +190,7 @@ func TestClaimService_AssignToRole(t *testing.T) {
 		claim := testutil.NewTestClaim()
 		claimRepo.AddClaim(claim)
 
-		err := svc.AssignToRole(ctx, uuid.New(), claim.ID)
+		err := svc.AssignToRole(ctx, utils.GenerateUUID(), claim.ID)
 		if err != ErrRoleNotFound {
 			t.Errorf("AssignToRole() error = %v, want %v", err, ErrRoleNotFound)
 		}

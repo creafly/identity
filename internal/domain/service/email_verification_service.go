@@ -10,10 +10,12 @@ import (
 	"math/big"
 	"time"
 
-	"github.com/creafly/identity/internal/domain/entity"
-	"github.com/creafly/identity/internal/domain/repository"
 	"github.com/creafly/outbox"
 	"github.com/google/uuid"
+
+	"github.com/creafly/identity/internal/domain/entity"
+	"github.com/creafly/identity/internal/domain/repository"
+	"github.com/creafly/identity/internal/utils"
 )
 
 var (
@@ -75,7 +77,7 @@ func (s *emailVerificationService) RequestVerification(ctx context.Context, user
 	_ = s.emailVerificationRepo.DeleteByUserID(ctx, userID)
 
 	token := &entity.EmailVerificationToken{
-		ID:        uuid.New(),
+		ID:        utils.GenerateUUID(),
 		UserID:    userID,
 		CodeHash:  codeHash,
 		ExpiresAt: time.Now().Add(VerificationCodeExpiry),

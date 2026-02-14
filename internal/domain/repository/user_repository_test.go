@@ -4,8 +4,8 @@ import (
 	"context"
 	"testing"
 
-	"github.com/google/uuid"
 	"github.com/creafly/identity/internal/testutil"
+	"github.com/creafly/identity/internal/utils"
 )
 
 func TestUserRepository_Create(t *testing.T) {
@@ -69,7 +69,7 @@ func TestUserRepository_GetByID(t *testing.T) {
 	})
 
 	t.Run("non-existing user", func(t *testing.T) {
-		_, err := repo.GetByID(ctx, uuid.New())
+		_, err := repo.GetByID(ctx, utils.GenerateUUID())
 		if err == nil {
 			t.Error("GetByID() expected error for non-existing user")
 		}

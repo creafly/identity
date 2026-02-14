@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/creafly/identity/internal/domain/entity"
+	"github.com/creafly/identity/internal/utils"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 )
@@ -130,7 +131,7 @@ func (r *tenantRoleRepository) AddClaim(ctx context.Context, tenantRoleID, claim
 		VALUES ($1, $2, $3, NOW())
 		ON CONFLICT (tenant_role_id, claim_id) DO NOTHING
 	`
-	_, err := r.db.ExecContext(ctx, query, uuid.New(), tenantRoleID, claimID)
+	_, err := r.db.ExecContext(ctx, query, utils.GenerateUUID(), tenantRoleID, claimID)
 	return err
 }
 
@@ -159,7 +160,7 @@ func (r *tenantRoleRepository) AssignToUser(ctx context.Context, userID, tenantI
 		VALUES ($1, $2, $3, $4, NOW())
 		ON CONFLICT (user_id, tenant_id, tenant_role_id) DO NOTHING
 	`
-	_, err := r.db.ExecContext(ctx, query, uuid.New(), userID, tenantID, tenantRoleID)
+	_, err := r.db.ExecContext(ctx, query, utils.GenerateUUID(), userID, tenantID, tenantRoleID)
 	return err
 }
 
@@ -278,7 +279,7 @@ func (r *tenantRoleRepository) CreateDefaultRoles(ctx context.Context, tenantID 
 	}
 
 	for _, roleDef := range defaultRoles {
-		roleID := uuid.New()
+		roleID := utils.GenerateUUID()
 
 		_, err = tx.ExecContext(ctx, `
 			INSERT INTO tenant_roles (id, tenant_id, name, description, is_default, created_at, updated_at)
@@ -293,7 +294,7 @@ func (r *tenantRoleRepository) CreateDefaultRoles(ctx context.Context, tenantID 
 				_, err = tx.ExecContext(ctx, `
 					INSERT INTO tenant_role_claims (id, tenant_role_id, claim_id, created_at)
 					VALUES ($1, $2, $3, NOW())
-				`, uuid.New(), roleID, c.ID)
+				`, utils.GenerateUUID(), roleID, c.ID)
 				if err != nil {
 					return err
 				}
@@ -304,7 +305,7 @@ func (r *tenantRoleRepository) CreateDefaultRoles(ctx context.Context, tenantID 
 					_, err = tx.ExecContext(ctx, `
 						INSERT INTO tenant_role_claims (id, tenant_role_id, claim_id, created_at)
 						VALUES ($1, $2, $3, NOW())
-					`, uuid.New(), roleID, claimID)
+					`, utils.GenerateUUID(), roleID, claimID)
 					if err != nil {
 						return err
 					}
@@ -335,7 +336,7 @@ func (r *tenantRoleRepository) BatchUpdateClaims(ctx context.Context, tenantRole
 			INSERT INTO tenant_role_claims (id, tenant_role_id, claim_id, created_at)
 			VALUES ($1, $2, $3, NOW())
 			ON CONFLICT (tenant_role_id, claim_id) DO NOTHING
-		`, uuid.New(), tenantRoleID, claimID)
+		`, utils.GenerateUUID(), tenantRoleID, claimID)
 		if err != nil {
 			return err
 		}

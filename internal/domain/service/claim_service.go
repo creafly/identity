@@ -6,8 +6,10 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+
 	"github.com/creafly/identity/internal/domain/entity"
 	"github.com/creafly/identity/internal/domain/repository"
+	"github.com/creafly/identity/internal/utils"
 )
 
 var (
@@ -60,7 +62,7 @@ func (s *claimService) Create(ctx context.Context, input CreateClaimInput) (*ent
 	}
 
 	claim := &entity.Claim{
-		ID:        uuid.New(),
+		ID:        utils.GenerateUUID(),
 		Value:     input.Value,
 		CreatedAt: time.Now(),
 	}
@@ -95,7 +97,7 @@ func (s *claimService) GetOrCreate(ctx context.Context, value string) (*entity.C
 	}
 
 	claim := &entity.Claim{
-		ID:        uuid.New(),
+		ID:        utils.GenerateUUID(),
 		Value:     value,
 		CreatedAt: time.Now(),
 	}

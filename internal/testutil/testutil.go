@@ -10,16 +10,17 @@ import (
 	"testing"
 	"time"
 
-	"github.com/creafly/identity/internal/domain/entity"
 	"github.com/creafly/outbox"
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/google/uuid"
+	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/jmoiron/sqlx"
 	"github.com/joho/godotenv"
 
-	_ "github.com/jackc/pgx/v5/stdlib"
+	"github.com/creafly/identity/internal/domain/entity"
+	"github.com/creafly/identity/internal/utils"
 )
 
 func init() {
@@ -152,8 +153,8 @@ func resetSchema(db *sqlx.DB) error {
 
 func NewTestUser() *entity.User {
 	return &entity.User{
-		ID:           uuid.New(),
-		Email:        fmt.Sprintf("test-%s@example.com", uuid.New().String()[:8]),
+		ID:           utils.GenerateUUID(),
+		Email:        fmt.Sprintf("test-%s@example.com", utils.GenerateUUID().String()[:8]),
 		PasswordHash: "$2a$10$test.hash.value",
 		FirstName:    "Test",
 		LastName:     "User",
@@ -167,7 +168,7 @@ func NewTestUser() *entity.User {
 }
 
 func NewTestTenant() *entity.Tenant {
-	id := uuid.New()
+	id := utils.GenerateUUID()
 	return &entity.Tenant{
 		ID:          id,
 		Name:        fmt.Sprintf("Test Tenant %s", id.String()[:8]),
@@ -180,7 +181,7 @@ func NewTestTenant() *entity.Tenant {
 }
 
 func NewTestRole() *entity.Role {
-	id := uuid.New()
+	id := utils.GenerateUUID()
 	return &entity.Role{
 		ID:          id,
 		Name:        fmt.Sprintf("test-role-%s", id.String()[:8]),
@@ -191,7 +192,7 @@ func NewTestRole() *entity.Role {
 }
 
 func NewTestClaim() *entity.Claim {
-	id := uuid.New()
+	id := utils.GenerateUUID()
 	return &entity.Claim{
 		ID:        id,
 		Value:     fmt.Sprintf("test:claim:%s", id.String()[:8]),
@@ -200,7 +201,7 @@ func NewTestClaim() *entity.Claim {
 }
 
 func NewTestTenantRole(tenantID uuid.UUID) *entity.TenantRole {
-	id := uuid.New()
+	id := utils.GenerateUUID()
 	return &entity.TenantRole{
 		ID:          id,
 		TenantID:    tenantID,
@@ -218,9 +219,9 @@ func NewTestOutboxEvent() *outbox.Event {
 
 func NewTestPasswordResetToken(userID uuid.UUID) *entity.PasswordResetToken {
 	return &entity.PasswordResetToken{
-		ID:        uuid.New(),
+		ID:        utils.GenerateUUID(),
 		UserID:    userID,
-		TokenHash: fmt.Sprintf("hash-%s", uuid.New().String()),
+		TokenHash: fmt.Sprintf("hash-%s", utils.GenerateUUID().String()),
 		ExpiresAt: time.Now().Add(1 * time.Hour),
 		CreatedAt: time.Now(),
 	}

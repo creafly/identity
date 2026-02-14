@@ -14,7 +14,8 @@
     "tokenExpired": "Token expired",
     "invalidToken": "Invalid token",
     "accountLocked": "Account temporarily locked due to too many failed login attempts. Please try again later.",
-    "registrationFailed": "Registration failed. Please check your information and try again."
+    "registrationFailed": "Registration failed. Please check your information and try again.",
+    "suspiciousActivity": "Suspicious activity detected. Please verify your identity."
   },
   "auth": {
     "registerSuccess": "Registration successful",

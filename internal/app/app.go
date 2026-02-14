@@ -24,7 +24,13 @@ type App struct {
 }
 
 func NewApp() *App {
-	return (&App{}).initApp()
+	a := (&App{}).initBaseApp()
+	a.initHttpServer()
+	return a
+}
+
+func NewMigratorApp() *App {
+	return (&App{}).initBaseApp()
 }
 
 func (a *App) StartApp(ctx context.Context) {
@@ -89,7 +95,7 @@ func (a *App) StartMigrator(migrateUp, migrateDown bool) {
 	}
 }
 
-func (a *App) initApp() *App {
+func (a *App) initBaseApp() *App {
 	_ = godotenv.Load()
 	validator.Init()
 	logger.InitFromEnv("identity")
@@ -98,7 +104,6 @@ func (a *App) initApp() *App {
 	})
 
 	a.initServiceProvider()
-	a.initHttpServer()
 
 	return a
 }

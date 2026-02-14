@@ -11,6 +11,7 @@ import (
 	"github.com/creafly/identity/internal/domain/entity"
 	"github.com/creafly/identity/internal/domain/service"
 	"github.com/creafly/identity/internal/testutil"
+	"github.com/creafly/identity/internal/utils"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )
@@ -255,7 +256,7 @@ func TestClaimHandler_GetByID(t *testing.T) {
 			return nil, service.ErrClaimNotFound
 		}
 
-		req := httptest.NewRequest(http.MethodGet, "/claims/"+uuid.New().String(), nil)
+		req := httptest.NewRequest(http.MethodGet, "/claims/"+utils.GenerateUUID().String(), nil)
 		w := httptest.NewRecorder()
 
 		router.ServeHTTP(w, req)
@@ -302,7 +303,7 @@ func TestClaimHandler_Delete(t *testing.T) {
 			return nil
 		}
 
-		req := httptest.NewRequest(http.MethodDelete, "/claims/"+uuid.New().String(), nil)
+		req := httptest.NewRequest(http.MethodDelete, "/claims/"+utils.GenerateUUID().String(), nil)
 		w := httptest.NewRecorder()
 
 		router.ServeHTTP(w, req)
@@ -317,7 +318,7 @@ func TestClaimHandler_Delete(t *testing.T) {
 			return service.ErrClaimNotFound
 		}
 
-		req := httptest.NewRequest(http.MethodDelete, "/claims/"+uuid.New().String(), nil)
+		req := httptest.NewRequest(http.MethodDelete, "/claims/"+utils.GenerateUUID().String(), nil)
 		w := httptest.NewRecorder()
 
 		router.ServeHTTP(w, req)

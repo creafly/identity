@@ -11,6 +11,7 @@ import (
 	"github.com/creafly/identity/internal/handler"
 	"github.com/creafly/identity/internal/infra/database"
 	"github.com/creafly/identity/internal/infra/kafka"
+	"github.com/creafly/identity/internal/infra/mlservice"
 	"github.com/creafly/identity/internal/infra/redis"
 	"github.com/creafly/logger"
 	"github.com/creafly/outbox"
@@ -69,6 +70,8 @@ type serviceProvider struct {
 	analyticsHnd  *handler.AnalyticsHandler
 
 	featureFlags *featureflags.Client
+
+	mlServiceClient *mlservice.Client
 
 	httpEngine *gin.Engine
 }
@@ -405,6 +408,7 @@ func (sp *serviceProvider) GetAuthHnd() *handler.AuthHandler {
 			sp.GetClaimSvc(),
 			sp.GetLoginAttemptTracker(),
 			sp.GetTOTPAttemptTracker(),
+			sp.GetMLServiceClient(),
 		)
 	}
 	return sp.authHnd
@@ -495,4 +499,20 @@ func (sp *serviceProvider) GetFeatureFlags() *featureflags.Client {
 		})
 	}
 	return sp.featureFlags
+}
+
+func (sp *serviceProvider) GetMLServiceClient() *mlservice.Client {
+	if sp.mlServiceClient == nil {
+		cfg := sp.GetConfig().MLService
+		sp.mlServiceClient = mlservice.NewClient(mlservice.Config{
+			BaseURL: cfg.BaseURL,
+			Timeout: cfg.Timeout,
+			Enabled: cfg.Enabled,
+		})
+
+		if cfg.Enabled {
+			logger.Info().Str("url", cfg.BaseURL).Msg("ML service client enabled")
+		}
+	}
+	return sp.mlServiceClient
 }

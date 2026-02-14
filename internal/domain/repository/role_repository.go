@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/creafly/identity/internal/domain/entity"
+	"github.com/creafly/identity/internal/utils"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 )
@@ -111,7 +112,7 @@ func (r *roleRepository) AssignToUser(ctx context.Context, userID, roleID uuid.U
 		VALUES ($1, $2, $3, NOW())
 		ON CONFLICT (user_id, role_id) DO NOTHING
 	`
-	_, err := r.db.ExecContext(ctx, query, uuid.New(), userID, roleID)
+	_, err := r.db.ExecContext(ctx, query, utils.GenerateUUID(), userID, roleID)
 	return err
 }
 

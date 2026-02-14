@@ -4,9 +4,9 @@ import (
 	"context"
 	"testing"
 
-	"github.com/google/uuid"
 	"github.com/creafly/identity/internal/testutil"
 	"github.com/creafly/identity/internal/testutil/mocks"
+	"github.com/creafly/identity/internal/utils"
 )
 
 func TestTenantRoleService_Create(t *testing.T) {
@@ -16,7 +16,7 @@ func TestTenantRoleService_Create(t *testing.T) {
 	ctx := context.Background()
 
 	t.Run("valid tenant role", func(t *testing.T) {
-		tenantID := uuid.New()
+		tenantID := utils.GenerateUUID()
 		input := CreateTenantRoleInput{
 			TenantID:    tenantID,
 			Name:        "editor",
@@ -37,7 +37,7 @@ func TestTenantRoleService_Create(t *testing.T) {
 	})
 
 	t.Run("duplicate name in same tenant", func(t *testing.T) {
-		tenantID := uuid.New()
+		tenantID := utils.GenerateUUID()
 		existingRole := testutil.NewTestTenantRole(tenantID)
 		tenantRoleRepo.AddTenantRole(existingRole)
 
@@ -60,7 +60,7 @@ func TestTenantRoleService_GetByID(t *testing.T) {
 	ctx := context.Background()
 
 	t.Run("existing role", func(t *testing.T) {
-		role := testutil.NewTestTenantRole(uuid.New())
+		role := testutil.NewTestTenantRole(utils.GenerateUUID())
 		tenantRoleRepo.AddTenantRole(role)
 
 		got, err := svc.GetByID(ctx, role.ID)
@@ -74,7 +74,7 @@ func TestTenantRoleService_GetByID(t *testing.T) {
 	})
 
 	t.Run("non-existing role", func(t *testing.T) {
-		_, err := svc.GetByID(ctx, uuid.New())
+		_, err := svc.GetByID(ctx, utils.GenerateUUID())
 		if err != ErrTenantRoleNotFound {
 			t.Errorf("GetByID() error = %v, want %v", err, ErrTenantRoleNotFound)
 		}
@@ -88,7 +88,7 @@ func TestTenantRoleService_Update(t *testing.T) {
 	ctx := context.Background()
 
 	t.Run("update role", func(t *testing.T) {
-		role := testutil.NewTestTenantRole(uuid.New())
+		role := testutil.NewTestTenantRole(utils.GenerateUUID())
 		tenantRoleRepo.AddTenantRole(role)
 
 		newName := "updated-tenant-role"
@@ -106,7 +106,7 @@ func TestTenantRoleService_Update(t *testing.T) {
 	t.Run("update non-existing role", func(t *testing.T) {
 		newName := "test"
 		input := UpdateTenantRoleInput{Name: &newName}
-		_, err := svc.Update(ctx, uuid.New(), input)
+		_, err := svc.Update(ctx, utils.GenerateUUID(), input)
 		if err != ErrTenantRoleNotFound {
 			t.Errorf("Update() error = %v, want %v", err, ErrTenantRoleNotFound)
 		}
@@ -120,7 +120,7 @@ func TestTenantRoleService_Delete(t *testing.T) {
 	ctx := context.Background()
 
 	t.Run("delete non-default role", func(t *testing.T) {
-		role := testutil.NewTestTenantRole(uuid.New())
+		role := testutil.NewTestTenantRole(utils.GenerateUUID())
 		role.IsDefault = false
 		tenantRoleRepo.AddTenantRole(role)
 
@@ -131,14 +131,14 @@ func TestTenantRoleService_Delete(t *testing.T) {
 	})
 
 	t.Run("delete non-existing role", func(t *testing.T) {
-		err := svc.Delete(ctx, uuid.New())
+		err := svc.Delete(ctx, utils.GenerateUUID())
 		if err != ErrTenantRoleNotFound {
 			t.Errorf("Delete() error = %v, want %v", err, ErrTenantRoleNotFound)
 		}
 	})
 
 	t.Run("delete default role should fail", func(t *testing.T) {
-		role := testutil.NewTestTenantRole(uuid.New())
+		role := testutil.NewTestTenantRole(utils.GenerateUUID())
 		role.IsDefault = true
 		tenantRoleRepo.AddTenantRole(role)
 
@@ -156,10 +156,10 @@ func TestTenantRoleService_AssignToUser(t *testing.T) {
 	ctx := context.Background()
 
 	t.Run("assign existing role", func(t *testing.T) {
-		tenantID := uuid.New()
+		tenantID := utils.GenerateUUID()
 		role := testutil.NewTestTenantRole(tenantID)
 		tenantRoleRepo.AddTenantRole(role)
-		userID := uuid.New()
+		userID := utils.GenerateUUID()
 
 		err := svc.AssignToUser(ctx, userID, tenantID, role.ID)
 		if err != nil {
@@ -168,7 +168,12 @@ func TestTenantRoleService_AssignToUser(t *testing.T) {
 	})
 
 	t.Run("assign non-existing role", func(t *testing.T) {
-		err := svc.AssignToUser(ctx, uuid.New(), uuid.New(), uuid.New())
+		err := svc.AssignToUser(
+			ctx,
+			utils.GenerateUUID(),
+			utils.GenerateUUID(),
+			utils.GenerateUUID(),
+		)
 		if err != ErrTenantRoleNotFound {
 			t.Errorf("AssignToUser() error = %v, want %v", err, ErrTenantRoleNotFound)
 		}
