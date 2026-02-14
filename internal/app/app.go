@@ -23,14 +23,15 @@ type App struct {
 	HttpServer      *http.Server
 }
 
-func NewApp() *App {
+func NewBaseApp() *App {
 	a := (&App{}).initBaseApp()
-	a.initHttpServer()
 	return a
 }
 
-func NewMigratorApp() *App {
-	return (&App{}).initBaseApp()
+func NewApp() *App {
+	a := NewBaseApp()
+	a.initHttpServer()
+	return a
 }
 
 func (a *App) StartApp(ctx context.Context) {
