@@ -3,7 +3,7 @@ module github.com/creafly/identity
 go 1.25.0
 
 require (
-	github.com/IBM/sarama v1.60.0
+	github.com/IBM/sarama v1.60.1
 	github.com/creafly/featureflags v0.1.1
 	github.com/creafly/logger v0.2.0
 	github.com/creafly/middleware v0.2.1
