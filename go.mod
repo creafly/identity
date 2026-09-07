@@ -1,6 +1,6 @@
 module github.com/creafly/identity
 
-go 1.25.0
+go 1.26.0
 
 require (
 	github.com/IBM/sarama v1.60.2
@@ -24,7 +24,7 @@ require (
 	github.com/redis/go-redis/v9 v9.22.0
 	github.com/xlab/closer v1.1.0
 	go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin v0.70.0
-	golang.org/x/crypto v0.55.0
+	golang.org/x/crypto v0.56.0
 )
 
 require (
